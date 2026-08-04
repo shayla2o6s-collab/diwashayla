@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diwash & Shayla — Memory Vault</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #d6336c;
+      --primary-light: #ff8fa3;
+      --bg-gradient-start: #fff0f3;
+      --bg-gradient-mid: #ffe3ec;
+      --bg-gradient-end: #f3e5f5;
+      --glass-bg: rgba(255, 255, 255, 0.55);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --shadow: 0 8px 32px rgba(214, 51, 108, 0.15);
+      --text: #4a4a68;
+      --text-light: #77779a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+      min-height: 100vh;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
+    /* Glass Card */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+
+    /* LOGIN SCREEN */
+    #login-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px; animation: fadeIn 0.8s ease;
+    }
+    .login-box {
+      width: 100%; max-width: 400px; padding: 40px 30px; text-align: center;
+    }
+    .login-box h1 {
+      font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--primary); margin-bottom: 6px;
+    }
+    .login-box .subtitle { font-size: 0.95rem; color: var(--text-light); margin-bottom: 30px; }
+    .heart-icon { font-size: 3rem; animation: pulse 2s infinite; margin-bottom: 10px; }
+    .passcode-dots {
+      display: flex; justify-content: center; gap: 16px; margin: 24px 0;
+    }
+    .dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(214,51,108,0.15); border: 2px solid var(--primary-light);
+      transition: all 0.3s ease;
+    }
+    .dot.filled { background: var(--primary); border-color: var(--primary); transform: scale(1.2); }
+    .keypad {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      max-width: 320px; margin: 0 auto;
+    }
+    .key {
+      aspect-ratio: 1; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.7); font-size: 1.4rem; font-weight: 500;
+      color: var(--text); cursor: pointer; transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .key:hover { background: white; transform: scale(1.08); }
+    .key:active { transform: scale(0.95); }
+    .key.delete { font-size: 1.1rem; color: var(--primary); }
+    .error-msg { color: #e03131; font-size: 0.85rem; margin-top: 12px; min-height: 20px; }
+    .lockout-msg { color: var(--primary); font-weight: 600; margin-top: 12px; }
+
+    /* SETUP */
+    #setup-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .setup-box { width: 100%; max-width: 420px; padding: 40px 30px; text-align: center; }
+    .setup-box h2 { font-family: 'Playfair Display', serif; color: var(--primary); margin-bottom: 10px; }
+    .setup-box p { color: var(--text-light); font-size: 0.9rem; margin-bottom: 24px; }
+    .input-field {
+      width: 100%; padding: 14px 18px; border-radius: 14px; border: 2px solid rgba(214,51,108,0.15);
+      background: rgba(255,255,255,0.6); font-size: 1rem; font-family: 'Poppins', sans-serif;
+      color: var(--text); outline: none; margin-bottom: 12px; transition: border-color 0.3s;
+    }
+    .input-field:focus { border-color: var(--primary-light); }
+    .btn-primary {
+      width: 100%; padding: 14px; border-radius: 14px; border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s; margin-top: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(214,51,108,0.3); }
+
+    /* MAIN APP */
+    #app-screen { min-height: 100vh; animation: fadeIn 0.6s ease; }
+    .app-header {
+      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(135deg, rgba(255,240,243,0.9), rgba(243,229,245,0.9));
+      backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+      padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .app-header h1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--primary); }
+    .header-actions { display: flex; gap: 10px; }
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 12px; border: none;
+      background: rgba(255,255,255,0.7); cursor: pointer; font-size: 1.1rem;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: var(--text);
+    }
+    .icon-btn:hover { background: white; transform: scale(1.05); }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+    /* Upload Area */
+    .upload-area {
+      border: 2px dashed var(--primary-light); border-radius: 20px;
+      padding: 40px 24px; text-align: center; cursor: pointer;
+      background: rgba(255,255,255,0.4); transition: all 0.3s; margin-bottom: 32px;
+    }
+    .upload-area:hover { background: rgba(255,255,255,0.7); border-color: var(--primary); transform: translateY(-2px); }
+    .upload-area.dragover { background: rgba(255,143,163,0.1); border-color: var(--primary); }
+    .upload-area h3 { color: var(--primary); margin-bottom: 8px; font-weight: 600; }
+    .upload-area p { color: var(--text-light); font-size: 0.9rem; }
+
+    /* Photo Form */
+    #photo-form {
+      margin-bottom: 32px; padding: 24px; animation: fadeIn 0.4s ease;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .form-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-secondary {
+      flex: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--primary-light);
+      background: transparent; color: var(--primary); font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(214,51,108,0.05); }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .photo-card {
+      border-radius: 20px; overflow: hidden; background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: all 0.3s ease;
+      cursor: pointer; position: relative;
+    }
+    .photo-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(214,51,108,0.15); }
+    .photo-card img { width: 100%; height: 220px; object-fit: cover; display: block; }
+    .photo-info { padding: 16px; }
+    .photo-info h4 { font-size: 1rem; margin-bottom: 4px; color: var(--text); }
+    .photo-info .date { font-size: 0.8rem; color: var(--primary); font-weight: 500; }
+    .photo-info p { font-size: 0.85rem; color: var(--text-light); margin-top: 6px; line-height: 1.4; }
+    .photo-actions {
+      position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; opacity: 0; transition: opacity 0.3s;
+    }
+    .photo-card:hover .photo-actions { opacity: 1; }
+    .action-btn {
+      width: 32px; height: 32px; border-radius: 10px; border: none;
+      background: rgba(255,255,255,0.9); cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center; color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .action-btn.delete-btn { color: #e03131; }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state .heart-icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.6; }
+    .empty-state h3 { font-family: 'Playfair Display', serif; color: var(--primary); margin-bottom: 8px; }
+    .empty-state p { color: var(--text-light); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+      background: white; border-radius: 24px; max-width: 600px; width: 100%; max-height: 90vh;
+      overflow: hidden; position: relative; animation: float 0.5s ease;
+    }
+    .modal-content img { width: 100%; max-height: 60vh; object-fit: contain; background: #f8f8f8; }
+    .modal-details { padding: 24px; }
+    .modal-details h3 { font-family: 'Playfair Display', serif; margin-bottom: 4px; }
+    .modal-details .date { color: var(--primary); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; }
+    .modal-details p { color: var(--text-light); line-height: 1.5; }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;
+      border-radius: 50%; border: none; background: rgba(255,255,255,0.9);
+      cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Settings Modal */
+    .settings-body { padding: 24px; }
+    .settings-body h3 { margin-bottom: 16px; color: var(--primary); font-family: 'Playfair Display', serif; }
+    .setting-row { margin-bottom: 16px; }
+    .setting-row label { display: block; font-size: 0.85rem; color: var(--text-light); margin-bottom: 6px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--text); color: white; padding: 12px 24px; border-radius: 12px;
+      font-size: 0.9rem; z-index: 300; opacity: 0; transition: all 0.4s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Stats */
+    .stats-bar {
+      display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,0.6); padding: 8px 18px; border-radius: 20px;
+      font-size: 0.85rem; color: var(--text-light); border: 1px solid var(--glass-border);
+    }
+    .stat-pill strong { color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <!-- SETUP SCREEN -->
+  <div id="setup-screen" class="hidden">
+    <div class="glass setup-box">
+      <div class="heart-icon">💕</div>
+      <h2>Diwash & Shayla</h2>
+      <p style="font-family:'Playfair Display',serif;color:var(--primary);font-size:1.1rem;margin-bottom:8px;font-style:italic;">"In all the world, there is no heart for me like yours."</p>
+      <p>Create a 4-digit passcode to secure your precious moments together.</p>
+      <input type="password" id="setup-pass" class="input-field" placeholder="Enter 4-digit passcode" maxlength="4" inputmode="numeric" pattern="[0-9]*" />
+      <input type="password" id="setup-pass-confirm" class="input-field" placeholder="Confirm passcode" maxlength="4" inputmode="numeric" pattern="[0-9]*" />
+      <button class="btn-primary" onclick="finishSetup()">Create Vault</button>
+      <p class="error-msg" id="setup-error"></p>
+    </div>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen" class="hidden">
+    <div class="glass login-box">
+      <div class="heart-icon">🔒</div>
+      <h1 style="font-family:'Playfair Display',serif;">Diwash & Shayla</h1>
+      <p class="subtitle" style="font-family:'Playfair Display',serif;font-style:italic;color:var(--primary-light);font-size:0.95rem;">"I saw that you were perfect, and so I loved you. Then I saw that you were not perfect and I loved you even more."</p>
+      <p class="subtitle">Enter your passcode to unlock your memories</p>
+      <div class="passcode-dots" id="passcode-dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <div class="keypad">
+        <button class="key" onclick="enterDigit(1)">1</button>
+        <button class="key" onclick="enterDigit(2)">2</button>
+        <button class="key" onclick="enterDigit(3)">3</button>
+        <button class="key" onclick="enterDigit(4)">4</button>
+        <button class="key" onclick="enterDigit(5)">5</button>
+        <button class="key" onclick="enterDigit(6)">6</button>
+        <button class="key" onclick="enterDigit(7)">7</button>
+        <button class="key" onclick="enterDigit(8)">8</button>
+        <button class="key" onclick="enterDigit(9)">9</button>
+        <button class="key" style="visibility:hidden"></button>
+        <button class="key" onclick="enterDigit(0)">0</button>
+        <button class="key delete" onclick="deleteDigit()">⌫</button>
+      </div>
+      <p class="error-msg" id="login-error"></p>
+      <p class="lockout-msg hidden" id="lockout-msg">Too many attempts. Locked.</p>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-screen" class="hidden">
+    <div class="app-header">
+      <h1>💕 Diwash & Shayla's Memories</h1>
+      <div class="header-actions">
+        <button class="icon-btn" title="Import backup" onclick="importBackup()">📥</button>
+        <button class="icon-btn" title="Export backup" onclick="exportBackup()">📤</button>
+        <button class="icon-btn" title="Settings" onclick="openSettings()">⚙️</button>
+        <button class="icon-btn" title="Lock" onclick="lockVault()">🔒</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="stats-bar">
+        <div class="stat-pill">📸 <strong id="count-display">0</strong> memories</div>
+        <div class="stat-pill">📅 Since <strong id="since-display">--</strong></div>
+      </div>
+
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+        <h3>+ Add a New Memory</h3>
+        <p>Click or drag & drop photos here</p>
+        <input type="file" id="file-input" class="hidden" accept="image/*" multiple onchange="handleFiles(this.files)" />
+      </div>
+
+      <div id="photo-form" class="glass hidden">
+        <h4 style="margin-bottom:12px;color:var(--primary)">✨ Save Memory</h4>
+        <div class="form-row">
+          <input type="text" id="photo-title" class="input-field" placeholder="Memory title (e.g., First Date)" />
+          <input type="date" id="photo-date" class="input-field" />
+        </div>
+        <textarea id="photo-desc" class="input-field" rows="2" placeholder="What made this moment special?"></textarea>
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="cancelUpload()">Cancel</button>
+          <button class="btn-primary" onclick="saveMemory()">Save to Vault</button>
+        </div>
+      </div>
+
+      <div id="gallery" class="gallery"></div>
+
+      <div class="empty-state hidden" id="empty-state">
+        <div class="heart-icon">💕</div>
+        <h3>No memories yet</h3>
+        <p style="font-family:'Playfair Display',serif;font-style:italic;color:var(--primary-light);margin-bottom:12px;">"You are my sun, my moon, and all my stars."</p>
+        <p>Start building your collection of precious moments together.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE MODAL -->
+  <div id="image-modal" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <img id="modal-img" src="" alt="Memory" />
+      <div class="modal-details">
+        <h3 id="modal-title"></h3>
+        <div class="date" id="modal-date"></div>
+        <p id="modal-desc"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settings-modal" class="modal-overlay hidden" onclick="closeSettings(event)">
+    <div class="glass modal-content" style="max-width:400px" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+      <div class="settings-body">
+        <h3>⚙️ Vault Settings</h3>
+        <div class="setting-row">
+          <label>Change Passcode</label>
+          <input type="password" id="settings-old" class="input-field" placeholder="Current passcode" maxlength="4" inputmode="numeric" />
+          <input type="password" id="settings-new" class="input-field" placeholder="New 4-digit passcode" maxlength="4" inputmode="numeric" />
+          <button class="btn-primary" style="margin-top:8px" onclick="changePasscode()">Update Passcode</button>
+        </div>
+        <div class="setting-row">
+          <label>Danger Zone</label>
+          <button class="btn-secondary" style="border-color:#e03131;color:#e03131" onclick="clearAllData()">🗑 Clear All Memories</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // STATE
+    let passcode = localStorage.getItem('mv_passcode');
+    let memories = JSON.parse(localStorage.getItem('mv_memories') || '[]');
+    let tempImage = null;
+    let enteredPasscode = '';
+    let failedAttempts = parseInt(localStorage.getItem('mv_fails') || '0');
+    let lockoutUntil = parseInt(localStorage.getItem('mv_lockout') || '0');
+
+    // INIT
+    window.onload = () => {
+      if (!passcode) {
+        show('setup-screen');
+      } else {
+        show('login-screen');
+      }
+      renderGallery();
+    };
+
+    // HELPERS
+    function show(id) { document.querySelectorAll('#setup-screen, #login-screen, #app-screen').forEach(el => el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+    function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    function saveData() { localStorage.setItem('mv_memories', JSON.stringify(memories)); }
+
+    // SETUP
+    function finishSetup() {
+      const p1 = document.getElementById('setup-pass').value;
+      const p2 = document.getElementById('setup-pass-confirm').value;
+      const err = document.getElementById('setup-error');
+      if (!/^\d{4}$/.test(p1)) { err.textContent = 'Passcode must be exactly 4 digits.'; return; }
+      if (p1 !== p2) { err.textContent = 'Passcodes do not match.'; return; }
+      passcode = p1;
+      localStorage.setItem('mv_passcode', passcode);
+      localStorage.setItem('mv_created', new Date().toISOString());
+      show('app-screen');
+      updateStats();
+      toast('Your Memory Vault is ready! 💕');
+    }
+
+    // LOGIN
+    function enterDigit(d) {
+      if (enteredPasscode.length >= 4) return;
+      if (Date.now() < lockoutUntil) return;
+      enteredPasscode += d;
+      updateDots();
+      if (enteredPasscode.length === 4) checkPasscode();
+    }
+    function deleteDigit() {
+      enteredPasscode = enteredPasscode.slice(0, -1);
+      updateDots();
+      document.getElementById('login-error').textContent = '';
+    }
+    function updateDots() {
+      document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('filled', i < enteredPasscode.length));
+    }
+    function checkPasscode() {
+      if (Date.now() < lockoutUntil) return;
+      if (enteredPasscode === passcode) {
+        enteredPasscode = '';
+        failedAttempts = 0;
+        localStorage.setItem('mv_fails', '0');
+        updateDots();
+        show('app-screen');
+        updateStats();
+      } else {
+        failedAttempts++;
+        localStorage.setItem('mv_fails', failedAttempts);
+        enteredPasscode = '';
+        updateDots();
+        const err = document.getElementById('login-error');
+        if (failedAttempts >= 5) {
+          const lockTime = Date.now() + 60000;
+          localStorage.setItem('mv_lockout', lockTime);
+          lockoutUntil = lockTime;
+          err.textContent = '';
+          document.getElementById('lockout-msg').classList.remove('hidden');
+          setTimeout(() => { lockoutUntil = 0; localStorage.removeItem('mv_lockout'); document.getElementById('lockout-msg').classList.add('hidden'); }, 60000);
+        } else {
+          err.textContent = `Wrong passcode. ${5 - failedAttempts} attempts left.`;
+        }
+      }
+    }
+    function lockVault() { show('login-screen'); document.getElementById('login-error').textContent = ''; }
+
+    // UPLOAD
+    function handleFiles(files) {
+      if (!files.length) return;
+      const file = files[0];
+      if (!file.type.startsWith('image/')) { toast('Please select an image file.'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        tempImage = e.target.result;
+        document.getElementById('photo-form').classList.remove('hidden');
+        document.getElementById('photo-date').valueAsDate = new Date();
+        document.getElementById('photo-title').focus();
+      };
+      reader.readAsDataURL(file);
+    }
+    function cancelUpload() {
+      document.getElementById('photo-form').classList.add('hidden');
+      tempImage = null;
+      document.getElementById('photo-title').value = '';
+      document.getElementById('photo-desc').value = '';
+      document.getElementById('file-input').value = '';
+    }
+    function saveMemory() {
+      const title = document.getElementById('photo-title').value.trim() || 'Untitled Memory';
+      const date = document.getElementById('photo-date').value || new Date().toISOString().split('T')[0];
+      const desc = document.getElementById('photo-desc').value.trim();
+      if (!tempImage) { toast('No image selected.'); return; }
+      memories.unshift({ id: Date.now(), title, date, desc, image: tempImage });
+      saveData();
+      renderGallery();
+      cancelUpload();
+      updateStats();
+      toast('Memory saved! 💕');
+    }
+
+    // DRAG & DROP
+    const uploadArea = document.getElementById('upload-area');
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault(); uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    });
+
+    // GALLERY
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      const empty = document.getElementById('empty-state');
+      if (!memories.length) { gallery.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      gallery.innerHTML = memories.map(m => `
+        <div class="photo-card" onclick="openModal(${m.id})">
+          <div class="photo-actions">
+            <button class="action-btn delete-btn" onclick="event.stopPropagation(); deleteMemory(${m.id})" title="Delete">🗑</button>
+          </div>
+          <img src="${m.image}" alt="${escapeHtml(m.title)}" loading="lazy" />
+          <div class="photo-info">
+            <h4>${escapeHtml(m.title)}</h4>
+            <div class="date">${formatDate(m.date)}</div>
+            ${m.desc ? `<p>${escapeHtml(m.desc)}</p>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+    function deleteMemory(id) {
+      if (!confirm('Delete this memory forever?')) return;
+      memories = memories.filter(m => m.id !== id);
+      saveData();
+      renderGallery();
+      updateStats();
+      toast('Memory deleted.');
+    }
+    function openModal(id) {
+      const m = memories.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('modal-img').src = m.image;
+      document.getElementById('modal-title').textContent = m.title;
+      document.getElementById('modal-date').textContent = formatDate(m.date);
+      document.getElementById('modal-desc').textContent = m.desc || '';
+      document.getElementById('image-modal').classList.remove('hidden');
+    }
+    function closeModal(e) { if (!e || e.target.id === 'image-modal') document.getElementById('image-modal').classList.add('hidden'); }
+
+    // SETTINGS
+    function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); }
+    function closeSettings(e) { if (!e || e.target.id === 'settings-modal') document.getElementById('settings-modal').classList.add('hidden'); }
+    function changePasscode() {
+      const oldP = document.getElementById('settings-old').value;
+      const newP = document.getElementById('settings-new').value;
+      if (oldP !== passcode) { toast('Current passcode is incorrect.'); return; }
+      if (!/^\d{4}$/.test(newP)) { toast('New passcode must be 4 digits.'); return; }
+      passcode = newP;
+      localStorage.setItem('mv_passcode', passcode);
+      document.getElementById('settings-old').value = '';
+      document.getElementById('settings-new').value = '';
+      toast('Passcode updated!');
+    }
+    function clearAllData() {
+      if (!confirm('WARNING: This will delete ALL your memories. This cannot be undone!')) return;
+      if (!prompt('Type DELETE to confirm:') === 'DELETE') return;
+      memories = []; saveData(); renderGallery(); updateStats(); closeSettings();
+      toast('All memories cleared.');
+    }
+
+    // BACKUP
+    function exportBackup() {
+      const data = { passcode, memories, exported: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `memory-vault-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('Backup downloaded! 📤');
+    }
+    function importBackup() {
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = '.json';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = evt => {
+          try {
+            const data = JSON.parse(evt.target.result);
+            if (data.memories && Array.isArray(data.memories)) {
+              memories = data.memories;
+              saveData();
+              renderGallery();
+              updateStats();
+              toast('Backup restored! 📥');
+            } else { toast('Invalid backup file.'); }
+          } catch { toast('Could not read backup file.'); }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    // STATS
+    function updateStats() {
+      document.getElementById('count-display').textContent = memories.length;
+      const created = localStorage.getItem('mv_created');
+      if (created) {
+        const d = new Date(created);
+        document.getElementById('since-display').textContent = d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+      }
+    }
+
+    // UTILS
+    function escapeHtml(text) {
+      const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
+    }
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+  </script>
+</body>
+</html>
